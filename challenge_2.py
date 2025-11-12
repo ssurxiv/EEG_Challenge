@@ -10,8 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from torch import optim
 from tqdm import tqdm
 
-from model import CascadedEEGModel  # 네 모델 파일
-# from braindecode.models import EEGNeX  # encoder 교체 시 참고
+from model import CascadedEEGModel
 
 # =========================================
 # 0) Config
@@ -87,10 +86,7 @@ def make_loaders(train_t, valid_t, test_t, batch_size=BATCH_SIZE, num_workers=NU
 # 2) Data
 # =========================================
 def load_split_ch2(data_root: str, data_prefix: str):
-    """
-    R1–R3 → train, R4 → valid, R5 → test
-    반환 텐서는 정규화(robust z) 적용 전 원시 텐서
-    """
+
     Xs_train, Ys_train, Zs_train = [], [], []
     Xs_valid, Ys_valid, Zs_valid = [], [], []
     Xs_test,  Ys_test,  Zs_test  = [], [], []
@@ -337,7 +333,6 @@ def main():
     test_ds  = TensorDataset(Xs_test,  Zs_test_y, Zs_test)
     train_loader, valid_loader, test_loader = make_loaders(train_ds, valid_ds, test_ds)
 
-    # 통계 (sign/dir용)
     ext_mean = torch.tensor(Ys_train.mean().item(), dtype=torch.float32).to(device)
     ext_std  = torch.tensor(Ys_train.std(unbiased=True).item(), dtype=torch.float32).clamp_min(1e-6).to(device)
 
@@ -360,7 +355,6 @@ def main():
         tr_logs = train_one_epoch(model, train_loader, optimizer, loss_fn, device, ext_mean, ext_std)
         va_logs, va_metrics = evaluate(model, valid_loader, loss_fn, device, ext_mean, ext_std)
 
-        # 로깅
         print(
             f"[JOINT][e{epoch:03d}] \n"
             f"Train | total {tr_logs['total']:.5f} | reg {tr_logs['reg']:.5f} | sex {tr_logs['sex']:.5f} | ext {tr_logs['ext']:.5f} | sgn {tr_logs['sgn']:.5f} | dir {tr_logs['dir']:.5f} |\n "
@@ -385,16 +379,13 @@ def main():
                 print(f"[JOINT] Early stopping at epoch {epoch}")
                 break
 
-    # 마지막 저장
     torch.save(model.state_dict(), last_path)
     print(f"[JOINT] Final model saved: {last_path}")
 
-    # 베스트 로드
     if os.path.exists(best_path):
         model.load_state_dict(torch.load(best_path, map_location=device))
         print(f"[JOINT] Loaded best(e{best_epoch}): {best_path}")
 
-    # 테스트
     _, te_metrics = evaluate(model, test_loader, loss_fn, device, ext_mean, ext_std)
     print(
         f"[JOINT][TEST-{run_id}]"
