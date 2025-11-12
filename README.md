@@ -1,8 +1,9 @@
 ## EEG Foundation Challenge
+---
 
 본 레포는 **EEG Foundation Challenge** 세팅에서  
-1️⃣ **Challenge 1:** 반응시간 회귀를 위한 DIR 기반 멀티-전문가 회귀  
-2️⃣ **Challenge 2:** externalizing 예측을 위한 다중과제 학습  
+1️⃣ **Challenge 1:** response-time regression task를 위한 DIR + BSAM 기반 imbalanced regression framework
+2️⃣ **Challenge 2:** externalizing 예측을 위한 multi-task EEG regression framework
 두 가지 파이프라인을 제공합니다.
 
 - 공식 페이지: [https://eeg2025.github.io/](https://eeg2025.github.io/)
@@ -13,10 +14,11 @@
 
 | 파일 | 설명 |
 |------|------|
-| `challenge_1.py` | DIR 기반 모델 학습 스크립트 (cross-task → cross-subject 회귀) |
-| `challenge_2.py` | CascadedEEG 다중과제 프리트레인 스크립트 (factors → externalizing) |
-| `dir.py` | DIR 유틸 및 손실 함수 (그룹 분할, 소프트 라벨, ordinal contrastive 등) |
-| `model.py` | `CascadedEEGModel` 정의 (EEGNeX 인코더, 게이트 융합 옵션 포함) |
+| `challenge_1.py` | DIR와 BSAM을 결합한 반응시간 회귀 학습 스크립트 (그룹 분류 + 멀티 전문가 회귀, descending soft labels, balanced sharpness aware 최적화) |
+| `challenge_2.py` | CascadedEEG 기반 다중과제 학습으로 externalizing 예측 (internalizing, attention, p factor, age, sex 공동 학습) |
+| `dir.py` | DIR 유틸 및 손실 모듈 (그룹 분할, 소프트 라벨링, 분위 경계 계산, 균형 가중치, ordinal group contrastive) |
+| `model.py` | CascadedEEGModel 정의 (EEGNeX 인코더, 게이트 기반 융합, externalizing 헤드) |
+
 
 ---
 ### 📄 Reference
